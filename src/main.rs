@@ -1,6 +1,8 @@
+use std::collections::HashMap;
+
 #[derive(PartialEq, Debug)]
 struct Car {
-    color: Color,
+    color: String,
     motor: Transmission,
     roof: bool,
     age: (Age, u32),
@@ -19,25 +21,36 @@ enum Age {
     Used,
 }
 
-#[derive(PartialEq, Debug)]
-enum Color {
-    Red,
-    Green,
-    Blue,
-}
-
 fn car_quality(miles: u32) -> (Age, u32) {
-    if miles == 0 {
-        return (Age::New, miles);
-    } else {
+    if miles > 0 {
         return (Age::Used, miles);
     }
+
+    (Age::New, miles)
 }
 
-fn car_factory(color: Color, motor: Transmission, roof: bool, miles: u32) -> Car {
+fn car_factory(order: i32, miles: u32) -> Car {
+    let colors = ["Blue", "Green", "Red", "Silver"];
+
+    let mut color = order;
+    while color > 4 {
+        color -= 4;
+    }
+
+    let mut motor = Transmission::Manual;
+    let mut roof = true;
+    if order % 3 == 0 {
+        // 3, 6, 9
+        motor = Transmission::Automatic;
+    } else if order % 2 == 0 {
+        // 2, 4, 8, 10
+        motor = Transmission::SemiAuto;
+        roof = false;
+    } // 1, 5, 7, 11
+
+    // Return requested "Car"
     Car {
-        // color: car_color(color),
-        color,
+        color: String::from(colors[(color - 1) as usize]),
         motor,
         roof,
         age: car_quality(miles),
@@ -45,15 +58,22 @@ fn car_factory(color: Color, motor: Transmission, roof: bool, miles: u32) -> Car
 }
 
 fn main() {
-    let quality1 = car_quality(0);
-    let quality2 = car_quality(500);
-    println!("quality1: {:#?}", quality1);
-    println!("quality2: {:#?}", quality2);
+    let mut orders: HashMap<i32, Car> = HashMap::new();
 
-    let car1 = car_factory(Color::Red, Transmission::Automatic, true, 0);
-    let car2 = car_factory(Color::Green, Transmission::Manual, true, 5000);
-    let car3 = car_factory(Color::Blue, Transmission::SemiAuto, false, 50);
-    println!("car1: {:#?}", car1);
-    println!("car2: {:#?}", car2);
-    println!("car3: {:#?}", car3);
+    // Initialize counter variable
+    // Declare a car as mutable "Car" struct
+    let mut car: Car;
+    let mut miles = 0;
+
+    for order in 1..6 {
+        car = car_factory(order, miles);
+        orders.insert(order, car);
+        println!("Car order #{}: {:?}", order, orders.get(&order));
+
+        if miles == 2100 {
+            miles = 0;
+        } else {
+            miles += 700;
+        }
+    }
 }
